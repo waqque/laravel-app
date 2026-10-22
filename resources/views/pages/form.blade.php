@@ -3,33 +3,24 @@
 @section('title', 'Форма обратной связи')
 
 @section('content')
-<div class="card">
-    <h2>Форма обратной связи</h2>
-    <p style="color: #666666; font-size: 14px;">
-        Заполните поля ниже. После нажатия на кнопку будет отправлен <strong>POST-запрос</strong>, контроллер проверит валидность данных и сохранит их в отдельный <strong>JSON-файл</strong> с уникальным именем.
-    </p>
+    <h1>Форма обратной связи</h1>
+    <p>Заполните форму ниже. Данные будут отправлены через POST-запрос и сохранены в файл JSON.</p>
 
-    {{-- Сообщение об успешной отправке --}}
+    {{-- Сообщение об успешном сохранении --}}
     @if(session('success'))
-        <div class="alert alert-success">
-            <strong>Готово!</strong> {{ session('success') }}
+        <div style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px; margin-bottom: 15px;">
+            <strong>Успешно:</strong> {{ session('success') }}
             @if(session('saved_file'))
-                <div style="margin-top: 5px;">
-                    Имя файла: <code>{{ session('saved_file') }}</code>
-                </div>
+                <br>Файл: <code>{{ session('saved_file') }}</code>
             @endif
-            <div style="margin-top: 10px;">
-                <a href="{{ route('feedback.index') }}" class="btn btn-success" style="font-size: 12px; padding: 5px 10px;">
-                    Перейти к таблице записей &rarr;
-                </a>
-            </div>
+            <br><a href="{{ route('feedback.index') }}">Перейти к таблице &rarr;</a>
         </div>
     @endif
 
     {{-- Вывод ошибок валидации --}}
     @if($errors->any())
-        <div class="alert alert-danger">
-            <strong>Пожалуйста, исправьте ошибки:</strong>
+        <div style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 10px; margin-bottom: 15px;">
+            <strong>Ошибки:</strong>
             <ul>
                 @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -38,93 +29,63 @@
         </div>
     @endif
 
-    <!-- Форма отправки данных -->
     <form action="{{ route('feedback.store') }}" method="POST">
-        {{-- Обязательный токен безопасности CSRF в Laravel --}}
         @csrf
 
-        <div class="form-group">
-            <label for="name">Ваше имя: <span class="required">*</span></label>
-            <input
-                type="text"
-                id="name"
-                name="name"
-                value="{{ old('name') }}"
-                class="@error('name') is-invalid @enderror"
-                placeholder="Например, Иван"
-            >
+        <p>
+            <label>Имя:<br>
+                <input type="text" name="name" value="{{ old('name') }}" style="width: 300px; padding: 4px;">
+            </label>
             @error('name')
-                <div class="field-error">{{ $message }}</div>
+                <br><span style="color: red; font-size: 13px;">{{ $message }}</span>
             @enderror
-        </div>
+        </p>
 
-        <div class="form-group">
-            <label for="email">Электронная почта: <span class="required">*</span></label>
-            <input
-                type="email"
-                id="email"
-                name="email"
-                value="{{ old('email') }}"
-                class="@error('email') is-invalid @enderror"
-                placeholder="ivan@example.com"
-            >
+        <p>
+            <label>Email:<br>
+                <input type="email" name="email" value="{{ old('email') }}" style="width: 300px; padding: 4px;">
+            </label>
             @error('email')
-                <div class="field-error">{{ $message }}</div>
+                <br><span style="color: red; font-size: 13px;">{{ $message }}</span>
             @enderror
-        </div>
+        </p>
 
-        <div class="form-group">
-            <label for="category">Категория обращения: <span class="required">*</span></label>
-            <select id="category" name="category" class="@error('category') is-invalid @enderror">
-                <option value="" disabled {{ old('category') ? '' : 'selected' }}>-- Выберите категорию --</option>
-                <option value="Вопрос" {{ old('category') == 'Вопрос' ? 'selected' : '' }}>Вопрос</option>
-                <option value="Предложение" {{ old('category') == 'Предложение' ? 'selected' : '' }}>Предложение</option>
-                <option value="Отзыв" {{ old('category') == 'Отзыв' ? 'selected' : '' }}>Отзыв</option>
-                <option value="Техподдержка" {{ old('category') == 'Техподдержка' ? 'selected' : '' }}>Техподдержка</option>
-                <option value="Другое" {{ old('category') == 'Другое' ? 'selected' : '' }}>Другое</option>
-            </select>
+        <p>
+            <label>Категория:<br>
+                <select name="category" style="width: 300px; padding: 4px;">
+                    <option value="" disabled {{ old('category') ? '' : 'selected' }}>-- Выберите категорию --</option>
+                    <option value="Вопрос" {{ old('category') == 'Вопрос' ? 'selected' : '' }}>Вопрос</option>
+                    <option value="Предложение" {{ old('category') == 'Предложение' ? 'selected' : '' }}>Предложение</option>
+                    <option value="Отзыв" {{ old('category') == 'Отзыв' ? 'selected' : '' }}>Отзыв</option>
+                    <option value="Техподдержка" {{ old('category') == 'Техподдержка' ? 'selected' : '' }}>Техподдержка</option>
+                    <option value="Другое" {{ old('category') == 'Другое' ? 'selected' : '' }}>Другое</option>
+                </select>
+            </label>
             @error('category')
-                <div class="field-error">{{ $message }}</div>
+                <br><span style="color: red; font-size: 13px;">{{ $message }}</span>
             @enderror
-        </div>
+        </p>
 
-        <div class="form-group">
-            <label for="topic">Тема сообщения: <span class="required">*</span></label>
-            <input
-                type="text"
-                id="topic"
-                name="topic"
-                value="{{ old('topic') }}"
-                class="@error('topic') is-invalid @enderror"
-                placeholder="Кратко опишите тему"
-            >
+        <p>
+            <label>Тема:<br>
+                <input type="text" name="topic" value="{{ old('topic') }}" style="width: 300px; padding: 4px;">
+            </label>
             @error('topic')
-                <div class="field-error">{{ $message }}</div>
+                <br><span style="color: red; font-size: 13px;">{{ $message }}</span>
             @enderror
-        </div>
+        </p>
 
-        <div class="form-group">
-            <label for="message">Текст сообщения: <span class="required">*</span></label>
-            <textarea
-                id="message"
-                name="message"
-                rows="4"
-                class="@error('message') is-invalid @enderror"
-                placeholder="Напишите ваше сообщение здесь (от 10 символов)..."
-            >{{ old('message') }}</textarea>
+        <p>
+            <label>Сообщение:<br>
+                <textarea name="message" rows="5" style="width: 400px; padding: 4px;">{{ old('message') }}</textarea>
+            </label>
             @error('message')
-                <div class="field-error">{{ $message }}</div>
+                <br><span style="color: red; font-size: 13px;">{{ $message }}</span>
             @enderror
-        </div>
+        </p>
 
-        <div style="margin-top: 20px;">
-            <button type="submit" class="btn btn-primary">
-                Отправить данные (POST)
-            </button>
-            <a href="{{ route('home') }}" class="btn btn-secondary" style="margin-left: 8px;">
-                Отмена
-            </a>
-        </div>
+        <p>
+            <button type="submit" style="padding: 6px 14px; cursor: pointer;">Отправить данные</button>
+        </p>
     </form>
-</div>
 @endsection

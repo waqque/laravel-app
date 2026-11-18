@@ -1,82 +1,85 @@
-# Laravel Web Application Base (v1.0)
+# Laravel Web Application (v2.0)
 
-Основа веб-приложения на базе фреймворка Laravel 13 с модульной архитектурой представлений Blade, валидацией данных, сохранением в файлы JSON с уникальными именами и табличным отображением.
+Учебное веб-приложение на базе фреймворка Laravel. Включает базовую настройку, сохранение данных формы в JSON-файлы, а также полноценную работу с базой данных через **Eloquent ORM**.
 
 ---
 
 ## 🚀 Основные возможности
 
-1. **Базовая конфигурация приложения**:
-   - Секретный ключ шифрования (`APP_KEY` AES-256-CBC)
-   - Часовой пояс: `Europe/Moscow` (`config/app.php` и `.env`)
-   - Локаль: `ru` (с fallback `en`)
-   - Режим отладки: `APP_DEBUG=true`
+### Часть 1: Базовая основа приложения
+- **Настройки**: Секретный ключ (`APP_KEY`), часовой пояс `Europe/Moscow`, локаль `ru`, режим отладки `APP_DEBUG=true`.
+- **Маршрутизация**: GET и POST маршруты для страниц и формы.
+- **Лейаут и шаблоны Blade**: Базовый шаблон (`layouts/app.blade.php`), подключение хедера (`partials/header.blade.php`) и футера (`partials/footer.blade.php`).
+- **Форма с сохранением в JSON**: Валидация полей, сохранение в файл `storage/app/submissions/*.json` с уникальным именем, вывод таблицы полученных данных (`/submissions`).
 
-2. **Маршрутизация (GET и POST)**:
-   - `GET /` — Главная страница приложения с обзором и статистикой.
-   - `GET /feedback` — Страница формы для отправки обращения.
-   - `POST /feedback` — Обработчик отправки формы с серверной валидацией и сохранением в JSON.
-   - `GET /submissions` — Страница со списком всех полученных данных в виде таблицы.
-   - `GET /submissions/download/{filename}` — Скачивание исходного JSON-файла.
-
-3. **Контроллеры**:
-   - `App\Http\Controllers\HomeController` — обработка главной страницы.
-   - `App\Http\Controllers\FeedbackController` — обработка формы, валидация полей, генерация уникального имени файла и сохранение в JSON (`storage/app/submissions/*.json`), а также чтение и вывод записей в таблицу.
-
-4. **Представления (Blade)**:
-   - Базовый лейаут: `resources/views/layouts/app.blade.php`
-   - Вставка хедера с логотипом и меню: `resources/views/partials/header.blade.php`
-   - Вставка футера: `resources/views/partials/footer.blade.php`
-   - Главная страница: `resources/views/pages/home.blade.php`
-   - Страница формы: `resources/views/pages/form.blade.php` (CSRF-защита `@csrf`, вывод ошибок `$errors`, вывод flash-сообщения `session('success')`)
-   - Страница таблицы: `resources/views/pages/table.blade.php` (адаптивная таблица, счетчик записей, статусные бейджи)
-
-5. **Тестирование**:
-   - Полноценные Feature-тесты (`tests/Feature/FeedbackTest.php`), покрывающие все сценарии валидации, сохранения в JSON, скачивания и табличного вывода.
+### Часть 2: Работа с базой данных и Eloquent ORM
+- **Модели и миграции**:
+  - `Post` — статьи/посты (таблица `posts`)
+  - `Category` — категории (таблица `categories`)
+  - `Tag` — теги (таблица `tags`)
+  - `Comment` — комментарии (таблица `comments`)
+  - `User` — авторы постов и комментариев (таблица `users`)
+- **Параметры моделей**:
+  - Настроены массивы `$fillable` для безопасного массового заполнения.
+  - Настроены преобразования типов `$casts` (`is_published => boolean`, `views_count => integer`).
+- **Связи между моделями (Relationships)**:
+  - `BelongsTo`: `Post -> category`, `Post -> user`, `Comment -> user`
+  - `HasMany`: `Category -> posts`, `User -> posts`
+  - `BelongsToMany`: `Post <-> Tag` через промежуточную таблицу `post_tag`
+  - **Полиморфная связь**: `Comment` (`commentable()` -> `morphTo`) может прикрепляться к разным сущностям (`Post`, `Category` через `morphMany`).
+- **Query Scopes**:
+  - `scopePublished($query)` — только опубликованные посты
+  - `scopePopular($query, $minViews = 100)` — популярные посты с просмотрами от 100
+  - `scopeByCategory($query, $categoryId)` — фильтрация по категории
+  - `scopeSearch($query, $term)` — поиск по заголовку и тексту
+- **Мягкое удаление (Soft Deletes)**:
+  - Трейт `SoftDeletes` для модели `Post`.
+  - Возможность просмотра корзины, мягкого удаления и восстановления постов (`/posts/{id}/restore`).
+- **CRUD через веб-контроллер (`PostController`)**:
+  - `GET /posts` — список статей с возможностью фильтрации по scopes и статусу удаления
+  - `GET /posts/create` — форма создания статьи
+  - `POST /posts` — сохранение новой статьи и привязка тегов
+  - `GET /posts/{id}` — подробный просмотр статьи, ее категории, тегов и полиморфных комментариев
+  - `GET /posts/{id}/edit` — форма редактирования статьи
+  - `PUT /posts/{id}` — обновление данных и синхронизация тегов
+  - `DELETE /posts/{id}` — мягкое удаление статьи
+  - `POST /posts/{id}/restore` — восстановление статьи из корзины
+  - `POST /posts/{id}/comments` — добавление комментария к посту
+- **JSON API с использованием API Resource (`PostApiController`)**:
+  - `PostResource`, `CategoryResource`, `TagResource`, `CommentResource`
+  - `GET /api/posts` — список статей в формате JSON (поддерживает `?filter=published`, `?filter=popular`, `?filter=trashed`)
+  - `GET /api/posts/{id}` — данные конкретной статьи с загруженными связями
+  - `POST /api/posts` — создание статьи через API (валидация + ответ 201 Created)
+  - `PUT /api/posts/{id}` — обновление статьи через API
+  - `DELETE /api/posts/{id}` — мягкое удаление статьи через API
+  - `POST /api/posts/{id}/restore` — восстановление статьи через API
 
 ---
 
-## 🛠️ Запуск приложения
+## 🛠️ Запуск проекта
 
 ```bash
-# Установка зависимостей (если разворачивается заново)
+# 1. Установка зависимостей
 composer install
 
-# Генерация ключа приложения (если не был создан)
+# 2. Настройка окружения и генерация ключа
+cp .env.example .env
 php artisan key:generate
 
-# Запуск встроенного веб-сервера
+# 3. Выполнение миграций и наполнение базы данных
+php artisan migrate --seed
+
+# 4. Запуск сервера разработки
 php artisan serve
 ```
 
-После запуска приложение будет доступно по адресу: **http://127.0.0.1:8000**
+Приложение доступно по адресу: **http://127.0.0.1:8000**
 
 ---
 
-## 📁 Структура сохраненных данных JSON
+## 🧪 Запуск тестов
 
-Файлы сохраняются в директорию `storage/app/submissions/` с уникальным именем формата:
-`submission_YYYYMMDD_HHMMSS_<uniqid>.json`
-
-Пример содержимого файла:
-```json
-{
-    "id": "sub_6ad19915526a18.96379549",
-    "created_at": "2026-10-16 06:25:09",
-    "name": "Иван Иванов",
-    "email": "ivan@example.com",
-    "topic": "Вопрос по функционалу",
-    "category": "Вопрос",
-    "message": "Пример текста сообщения, сохраненного через форму.",
-    "meta": {
-        "user_agent": "Mozilla/5.0 ...",
-        "ip": "127.0.0.1"
-    }
-}
+```bash
+php artisan test
 ```
-
----
-
-## 🏷️ Версионирование
-
-- **Версия**: `v1.0` (зафиксирована тегом в Git)
+Покрыты все ключевые функции: валидация, сохранение в JSON, операции Eloquent, связи, query scopes, soft delete и API resources.

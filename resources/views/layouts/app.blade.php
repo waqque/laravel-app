@@ -1,60 +1,86 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-100">
+<html lang="ru">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <title>@yield('title', 'Веб-приложение на Laravel') - {{ config('app.name', 'LaravelApp') }}</title>
-
-    <!-- Bootstrap 5 CSS & Icons CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
+    <title>@yield('title', 'Учебное приложение')</title>
     <style>
-        :root {
-            --bs-primary: #0d6efd;
-            --brand-color: #ff2d20;
-        }
         body {
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: #f8fafc;
-            color: #1e293b;
+            font-family: Arial, sans-serif;
+            max-width: 850px;
+            margin: 20px auto;
+            padding: 0 15px;
+            line-height: 1.5;
+            color: #333;
         }
-        .card {
-            border-radius: 0.75rem;
-            border: 1px solid rgba(0,0,0,0.08);
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+        nav a {
+            text-decoration: none;
+            color: #0066cc;
         }
-        .btn-brand {
-            background-color: #ff2d20;
-            color: #ffffff;
-            border: none;
+        nav a:hover {
+            text-decoration: underline;
         }
-        .btn-brand:hover {
-            background-color: #e02418;
-            color: #ffffff;
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        form p {
+            margin-bottom: 12px;
+        }
+        input[type="text"], input[type="email"], select, textarea {
+            width: 100%;
+            max-width: 450px;
+            padding: 6px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        button {
+            padding: 6px 14px;
+            cursor: pointer;
         }
     </style>
-    @yield('styles')
 </head>
-<body class="d-flex flex-column h-100">
+<body>
 
-    {{-- Вставка хедера с логотипом и меню --}}
+    {{-- Вставка хедера (с логотипом и меню) --}}
     @include('partials.header')
 
-    {{-- Основная область контента --}}
-    <main class="flex-shrink-0 py-4">
-        <div class="container">
-            @yield('content')
-        </div>
+    <hr>
+
+    {{-- Основная часть страницы --}}
+    <main>
+        @yield('content')
     </main>
+
+    <hr>
 
     {{-- Вставка футера --}}
     @include('partials.footer')
 
-    <!-- Bootstrap 5 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    @yield('scripts')
 </body>
 </html>
